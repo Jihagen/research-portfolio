@@ -8,7 +8,7 @@ const esc = value => String(value).replace(/[&<>]/g, ch => ({ '&':'&amp;', '<':'
 const colours = { sense0:'#243a91', sense1:'#d67322', conflict:'#b24a48', coherent:'#32745e', terrain:'#aeb3af' };
 
 let layerData, geometryData, landscapeData, priorData, activeLayer = 0;
-let trajectoryView = { yaw: -0.76, pitch: 0.40, zoom: 1 };
+let trajectoryView = { yaw: 0, pitch: 0, zoom: 1 };
 
 function extent(points, key, pad = .08) {
   const values = points.map(key), lo = Math.min(...values), hi = Math.max(...values), edge = (hi - lo || 1) * pad;
@@ -109,7 +109,7 @@ function refreshTrajectoryItems() {
 }
 async function loadLandscapes() {
   landscapeData=await fetch(url.landscapes).then(r=>r.json());
-  const model=$('trajectoryModel'), models=Object.keys(landscapeData.cells); model.replaceChildren(...models.map(m=>opt(m,human(m)))); model.value=models.includes('Qwen_Qwen2.5-7B')?'Qwen_Qwen2.5-7B':models[0];
+  const model=$('trajectoryModel'), models=Object.keys(landscapeData.cells); model.replaceChildren(...models.map(m=>opt(m,human(m)))); model.value=models.includes('FacebookAI_roberta-large')?'FacebookAI_roberta-large':models[0];
   refreshTrajectoryWords(); model.addEventListener('change',refreshTrajectoryWords); $('trajectoryWord').addEventListener('change',refreshTrajectoryItems); $('trajectoryItem').addEventListener('change',drawTrajectory);
   const svg=$('trajectoryChart'); let start;
   svg.addEventListener('pointerdown',event=>{start={x:event.clientX,y:event.clientY,yaw:trajectoryView.yaw,pitch:trajectoryView.pitch};svg.setPointerCapture(event.pointerId);svg.classList.add('rotating');});
@@ -118,7 +118,7 @@ async function loadLandscapes() {
   svg.addEventListener('wheel',event=>{event.preventDefault();trajectoryView.zoom=Math.max(.75,Math.min(3,trajectoryView.zoom*(event.deltaY<0?1.12:.89)));drawTrajectory();},{passive:false});
   $('trajectoryZoomIn').addEventListener('click',()=>{trajectoryView.zoom=Math.min(3,trajectoryView.zoom*1.2);drawTrajectory();});
   $('trajectoryZoomOut').addEventListener('click',()=>{trajectoryView.zoom=Math.max(.75,trajectoryView.zoom/1.2);drawTrajectory();});
-  $('trajectoryViewReset').addEventListener('click',()=>{trajectoryView={yaw:-0.76,pitch:.40,zoom:1};drawTrajectory();});
+  $('trajectoryViewReset').addEventListener('click',()=>{trajectoryView={yaw:0,pitch:0,zoom:1};drawTrajectory();});
 }
 
 function drawPriors() {
@@ -130,5 +130,66 @@ function drawPriors() {
   $('priorCaption').textContent=bare?'Bare-word state at the released H0 layer':'Mean across five ambiguous carrier sentences at the released H0 layer';
 }
 async function loadPriors() { priorData=await fetch(url.priors).then(r=>r.json()); drawPriors(); $('priorCondition').addEventListener('change',drawPriors); }
+
+/* Garden-path landscape: a dense, top-down PCA display with an optional depth view. */
+const gardenColours={sense0:'#4A3AA7',sense1:'#D59A18',conflict:'#242329',coherent:'#1B998B',neutral:'#F5F2EC'};
+const gardenSenseLabels={
+  bank:['River / embankment','Financial institution'],bark:['Sound a dog makes','Outer layer of a tree'],bat:['Sports equipment','Flying mammal'],
+  crane:['Large wading bird','Construction lifting machine'],spring:['Season (after winter)','Natural spring / water source'],
+  match:['Sporting contest','Fire-starting stick'],pitch:['Sports playing field','Business proposal / investor presentation']
+};
+const hexRgb=hex=>{const n=parseInt(hex.slice(1),16);return[(n>>16)&255,(n>>8)&255,n&255]};
+const mixRgb=(a,b,t)=>a.map((v,i)=>Math.round(v+(b[i]-v)*t));
+function gardenDensity(point,points,h){return points.reduce((total,p)=>total+Math.exp(-((point[0]-p[0])**2+(point[1]-p[1])**2)/(2*h*h)),0)/(points.length*2*Math.PI*h*h)}
+function gardenField(cell,item){
+  const h=cell.landscape.bandwidth, profile0=cell.profile.points.filter((_,i)=>cell.profile.senses[i]===0).map(p=>p.slice(0,2)),profile1=cell.profile.points.filter((_,i)=>cell.profile.senses[i]===1).map(p=>p.slice(0,2));
+  const raw=[...cell.profile.points,...item.conflicting.points,...item.coherent_control.points].map(p=>p.slice(0,2));
+  const x0=Math.min(...raw.map(p=>p[0]))-3*h,x1=Math.max(...raw.map(p=>p[0]))+3*h,y0=Math.min(...raw.map(p=>p[1]))-3*h,y1=Math.max(...raw.map(p=>p[1]))+3*h;
+  const coarse=[],n0=61; let coarsePeak=0;
+  for(let iy=0;iy<n0;iy++)for(let ix=0;ix<n0;ix++){const x=x0+(x1-x0)*ix/(n0-1),y=y0+(y1-y0)*iy/(n0-1),d0=gardenDensity([x,y],profile0,h),d1=gardenDensity([x,y],profile1,h),total=.5*(d0+d1);coarse.push([x,y,total]);coarsePeak=Math.max(coarsePeak,total)}
+  const focus=coarse.filter(point=>point[2]/coarsePeak>.12).concat([...item.conflicting.points,...item.coherent_control.points].map(p=>[p[0],p[1],0]));
+  const fx0=Math.min(...focus.map(p=>p[0]))-1.3*h,fx1=Math.max(...focus.map(p=>p[0]))+1.3*h,fy0=Math.min(...focus.map(p=>p[1]))-1.3*h,fy1=Math.max(...focus.map(p=>p[1]))+1.3*h;
+  const n=91,values=[],points=[]; let peak=0;
+  for(let iy=0;iy<n;iy++){values[iy]=[];for(let ix=0;ix<n;ix++){const x=fx0+(fx1-fx0)*ix/(n-1),y=fy0+(fy1-fy0)*iy/(n-1),d0=gardenDensity([x,y],profile0,h),d1=gardenDensity([x,y],profile1,h),total=.5*(d0+d1);values[iy][ix]={d0,d1,total};peak=Math.max(peak,total)}}
+  for(let iy=0;iy<n;iy++)for(let ix=0;ix<n;ix++){const x=fx0+(fx1-fx0)*ix/(n-1),y=fy0+(fy1-fy0)*iy/(n-1),v=values[iy][ix];v.norm=v.total/peak;points.push([x,y,-v.norm])}
+  const at=point=>{const d0=gardenDensity(point,profile0,h),d1=gardenDensity(point,profile1,h);return{d0,d1,norm:.5*(d0+d1)/peak}};
+  return{n,values,points,at,frame:[fx0,fx1,fy0,fy1]};
+}
+function gardenContours(field,coords){
+  const result=[],at=(iy,ix)=>coords[iy*field.n+ix];
+  [.1,.2,.3,.4,.5,.6,.7,.8,.9].forEach((level,index)=>{let labelled=false;for(let iy=0;iy<field.n-1;iy++)for(let ix=0;ix<field.n-1;ix++){
+    const values=[field.values[iy][ix].norm,field.values[iy][ix+1].norm,field.values[iy+1][ix+1].norm,field.values[iy+1][ix].norm],points=[at(iy,ix),at(iy,ix+1),at(iy+1,ix+1),at(iy+1,ix)],edges=[[0,1],[1,2],[2,3],[3,0]],hits=[];
+    edges.forEach(([from,to])=>{if((values[from]>=level)!==(values[to]>=level)){const t=(level-values[from])/(values[to]-values[from]);hits.push([points[from][0]+(points[to][0]-points[from][0])*t,points[from][1]+(points[to][1]-points[from][1])*t])}});
+    if(hits.length===2){result.push(`<path class="terrain-contour" d="M${hits[0][0]},${hits[0][1]}L${hits[1][0]},${hits[1][1]}"/>`);if(index%2===1&&!labelled&&ix>6&&iy>6){result.push(`<text class="terrain-label" x="${hits[0][0]+3}" y="${hits[0][1]-3}">−${level.toFixed(1)}</text>`);labelled=true}}
+  }});return result.join('');
+}
+function gardenMesh(field,coords){
+  const at=(iy,ix)=>coords[iy*field.n+ix],purple=hexRgb(gardenColours.sense0),amber=hexRgb(gardenColours.sense1),neutral=hexRgb(gardenColours.neutral);let svg='';
+  for(let iy=0;iy<field.n-2;iy+=2)for(let ix=0;ix<field.n-2;ix+=2){const a=at(iy,ix),b=at(iy,ix+2),c=at(iy+2,ix+2),d=at(iy+2,ix),v=field.values[iy][ix],share=v.total?v.d0/(v.d0+v.d1):.5,hue=mixRgb(amber,purple,share),colour=mixRgb(neutral,hue,Math.pow(v.norm,.6));svg+=`<path d="M${a[0]},${a[1]}L${b[0]},${b[1]}L${c[0]},${c[1]}L${d[0]},${d[1]}Z" fill="rgb(${colour})" stroke="rgb(${colour})" stroke-width=".55"/>`}
+  return svg+gardenContours(field,coords);
+}
+function drawGardenMargins(item,labels){
+  const W=410,H=520,p={l:55,r:20,t:42,b:66},all=[...item.conflicting.full_space_correct_margins,...item.coherent_control.full_space_correct_margins],max=Math.max(.15,...all.map(value=>Math.abs(value)*1.25)),x=i=>p.l+i*(W-p.l-p.r)/2,y=value=>p.t+(max-value)/(2*max)*(H-p.t-p.b),zero=y(0);
+  let svg=`<rect x="${p.l}" y="${p.t}" width="${W-p.l-p.r}" height="${zero-p.t}" fill="${gardenColours.sense0}" opacity=".10"/><rect x="${p.l}" y="${zero}" width="${W-p.l-p.r}" height="${H-p.b-zero}" fill="${gardenColours.sense1}" opacity=".14"/>`;
+  [-max,-max/2,0,max/2,max].forEach(value=>svg+=`<line class="${value===0?'margin-zero':'margin-grid'}" x1="${p.l}" x2="${W-p.r}" y1="${y(value)}" y2="${y(value)}"/><text class="axis" x="${p.l-9}" y="${y(value)+4}" text-anchor="end">${fmt(value,2)}</text>`);
+  svg+=`<text class="margin-side-label" x="${W-p.r-4}" y="${p.t+16}" text-anchor="end">${esc(labels[item.target_sense])}</text><text class="margin-side-label" x="${W-p.r-4}" y="${H-p.b-11}" text-anchor="end">${esc(labels[1-item.target_sense])}</text><text class="margin-boundary" x="${p.l+7}" y="${zero-7}">decision boundary</text>`;
+  const draw=(values,colour,dash='')=>{const d=`M${values.map((value,i)=>`${x(i)},${y(value)}`).join('L')}`;svg+=`<path d="${d}" fill="none" stroke="white" stroke-width="7" stroke-linecap="round"/><path d="${d}" fill="none" stroke="${colour}" stroke-width="3" stroke-linecap="round" ${dash?`stroke-dasharray="${dash}"`:''}/>`;values.forEach((value,i)=>svg+=`<circle cx="${x(i)}" cy="${y(value)}" r="${4+i*1.1}" fill="${dash?'white':colour}" stroke="${colour}" stroke-width="2.2"/>`)};
+  draw(item.conflicting.full_space_correct_margins,gardenColours.conflict);draw(item.coherent_control.full_space_correct_margins,gardenColours.coherent,'7 4');
+  ['prime','homonym','resolver'].forEach((stage,i)=>svg+=`<text class="axis" x="${x(i)}" y="${H-28}" text-anchor="middle">${stage}</text><text class="stage-number" x="${x(i)}" y="${H-10}" text-anchor="middle">${i+1}</text>`);
+  $('marginChart').innerHTML=svg;
+  const crosses=item.conflicting.full_space_correct_margins[1]<0&&item.conflicting.full_space_correct_margins[2]>0,coherentTarget=item.coherent_control.full_space_correct_margins[2]>0;
+  $('boundaryReadout').innerHTML=`<div><b>Garden path</b><span class="${crosses?'crossed':'not-crossed'}">${crosses?'Crosses the decision boundary':'Does not cross the decision boundary'}</span><small>Resolver ${fmt(item.conflicting.full_space_correct_margins[2],4)}</small></div><div><b>Coherent context</b><span class="${coherentTarget?'crossed':'not-crossed'}">${coherentTarget?'Ends on the target side':'Ends on the alternative side'}</span><small>Resolver ${fmt(item.coherent_control.full_space_correct_margins[2],4)}</small></div>`;
+}
+function drawTrajectory(){
+  const cell=landscapeCell(),item=selectedLandscapeItem(),labels=gardenSenseLabels[$('trajectoryWord').value]||['Sense 1','Sense 2'],field=gardenField(cell,item),W=720,H=520,p={l:25,r:24,t:22,b:28},lift=point=>{const d=field.at(point);return[point[0],point[1],-d.norm+.045]},terrain=field.points,profile=cell.profile.points,profile3=profile.map(lift),conflict3=item.conflicting.points.map(lift),coherent3=item.coherent_control.points.map(lift),centroid3=cell.profile.centroids.map(lift);
+  const projected=project3D([...terrain,...profile3,...conflict3,...coherent3,...centroid3],W,H,p,trajectoryView.yaw,trajectoryView.pitch,trajectoryView.zoom),terrainT=projected.slice(0,terrain.length),profileT=projected.slice(terrain.length,terrain.length+profile.length),conflictT=projected.slice(terrain.length+profile.length,terrain.length+profile.length+3),coherentT=projected.slice(terrain.length+profile.length+3,terrain.length+profile.length+6),centroidT=projected.slice(-2);
+  let svg=`<defs><marker id="arrow-garden" markerWidth="8" markerHeight="8" refX="6.5" refY="4" orient="auto"><path d="M0,0L8,4L0,8Z" fill="${gardenColours.conflict}"/></marker><marker id="arrow-coherent" markerWidth="8" markerHeight="8" refX="6.5" refY="4" orient="auto"><path d="M0,0L8,4L0,8Z" fill="${gardenColours.coherent}"/></marker></defs>`+gardenMesh(field,terrainT);
+  const [fx0,fx1,fy0,fy1]=field.frame;let outside=0;profileT.forEach((point,i)=>{const raw=profile[i];if(raw[0]<fx0||raw[0]>fx1||raw[1]<fy0||raw[1]>fy1){outside++;return}svg+=`<circle cx="${point[0]}" cy="${point[1]}" r="3.4" fill="${cell.profile.senses[i]?gardenColours.sense1:gardenColours.sense0}" stroke="white" stroke-width=".75" opacity=".82"/>`});
+  centroidT.forEach((point,i)=>svg+=`<path class="centroid garden-centroid" d="M${point[0]-8},${point[1]-8}L${point[0]+8},${point[1]+8}M${point[0]+8},${point[1]-8}L${point[0]-8},${point[1]+8}" stroke="${i?gardenColours.sense1:gardenColours.sense0}"/><text class="landscape-sense-label" x="${point[0]+10}" y="${point[1]-9}">${esc(labels[i])}</text>`);
+  const drawPath=(points,colour,marker,dash='',offset=0,hollow=false)=>{points.slice(1).forEach((point,i)=>{const start=points[i];svg+=`<line x1="${start[0]}" y1="${start[1]}" x2="${point[0]}" y2="${point[1]}" stroke="white" stroke-width="7" stroke-linecap="round"/><path d="M${start[0]},${start[1]}L${point[0]},${point[1]}" fill="none" stroke="${colour}" stroke-width="2.7" stroke-linecap="round" ${dash?`stroke-dasharray="${dash}"`:''} marker-end="url(#${marker})"/>`});points.forEach((point,i)=>{const r=4.1+i*1.35;svg+=`<circle cx="${point[0]}" cy="${point[1]}" r="${r}" fill="${hollow?'white':colour}" stroke="${colour}" stroke-width="2.2"/><text class="path-stage-number" x="${point[0]}" y="${point[1]-11+offset}" text-anchor="middle" fill="${colour}">${i+1}</text>`})};
+  drawPath(conflictT,gardenColours.conflict,'arrow-garden');drawPath(coherentT,gardenColours.coherent,'arrow-coherent','7 4',17,true);
+  $('trajectoryChart').innerHTML=svg;$('trajectoryTitle').textContent=`Garden path versus coherent context on the sense landscape: ${human($('trajectoryModel').value)}, “${$('trajectoryWord').value}”, layer ${cell.analysis_layer}`;$('trajectoryCaption').textContent=`Top-down PC1–PC2 view · ${Math.round((cell.projection.explained_variance_ratio[0]+cell.projection.explained_variance_ratio[1])*100)}% of profile variance`;$('trajectoryZoom').textContent=`${Math.round(trajectoryView.zoom*100)}%`;$('senseZeroLabel').textContent=labels[0];$('senseOneLabel').textContent=labels[1];
+  $('stageReadout').innerHTML=`<p><b class="garden-path-name">Garden path</b>${esc(item.conflicting_sentence)}</p><p><b class="coherent-path-name">Coherent context</b>${esc(item.coherent_control_sentence)}</p>`;$('trajectoryNote').textContent=`1 prime, 2 homonym, 3 resolver. Depth is the negative density of the 40 profile sentences in the PC1–PC2 plane (${Math.round((cell.projection.explained_variance_ratio[0]+cell.projection.explained_variance_ratio[1])*100)}% of profile variance), scaled so the deepest well is −1: a display aid, not a model energy. X = sense centroid.${outside?` ${outside} profile point${outside===1?'':'s'} fall outside this focused frame.`:''}`;drawGardenMargins(item,labels);
+}
 
 Promise.all([loadGeometry(), loadLandscapes(), loadPriors()]).catch(error=>{ console.error(error); document.querySelectorAll('svg').forEach(svg=>svg.insertAdjacentHTML('afterend','<p class="figure-note">The released data could not be loaded. Please use the repository link above.</p>')); });
