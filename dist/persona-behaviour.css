@@ -1,0 +1,13 @@
+/* Scope: the behavioural-opening figure on the Master's thesis page. */
+.persona-behaviour-section .figure-intro{max-width:760px}
+.persona-distribution-panel{padding-bottom:14px}
+.persona-distribution-panel img{display:block;width:100%;height:auto;margin-top:18px;background:var(--paper)}
+.persona-stat-strip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin-top:18px;border-top:1px solid var(--line);border-left:1px solid var(--line)}
+.persona-stat-strip article{min-height:120px;padding:16px 20px 14px;border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+.persona-stat-strip strong{display:block;color:var(--blue);font:600 clamp(24px,2.7vw,37px)/1.02 "Source Serif 4",Georgia,serif;letter-spacing:-.03em}
+.persona-stat-strip span{display:block;margin-top:10px;color:#4d565b;font-size:13px;line-height:1.42}
+.persona-behaviour-section .figure-note{max-width:760px}
+@media (max-width:760px){
+  .persona-stat-strip{grid-template-columns:1fr}
+  .persona-stat-strip article{min-height:0;padding:16px}
+}
