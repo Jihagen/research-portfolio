@@ -10,6 +10,7 @@
 .findings li a{display:block;color:inherit;text-decoration:none;cursor:pointer}
 .findings li a:hover b,.findings li a:focus-visible b{color:var(--blue)}
 .findings li a:focus-visible{outline:2px solid var(--blue);outline-offset:4px}
+.thesis-summary ol{row-gap:12px}
 .thesis-summary .question-grid{gap:30px}
 .thesis-summary .question-grid .lead{font-size:23px}
 .thesis-summary .question-grid>div{gap:9px}
