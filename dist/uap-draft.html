@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>UAP generalisation — structural draft</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="thesis.css">
+  <link rel="stylesheet" href="uap-draft.css">
+</head>
+<body>
+  <header class="masthead"><a href="thesis.html">JULIA JIHAGEN <span>· RESEARCH COMPANION</span></a><nav class="study-nav" aria-label="Research projects"><a href="index.html">01 Homonym Semantics</a><a class="active" href="thesis.html">02 Master's Thesis</a></nav><a href="https://github.com/Jihagen/Vision-Transformers" target="_blank" rel="noreferrer">Repository ↗</a></header>
+  <main class="page uap-draft-page">
+    <section class="thesis-section">
+      <div class="section-label"><span>06</span><h2>Generalisation through pixels</h2></div>
+      <p class="figure-intro">Structural draft: the same comparison grammar as causal steering, but the intervention is one fixed image-space perturbation applied to held-out images.</p>
+      <p class="draft-status">DRAFT STRUCTURE · real image and per-image response assets pending publication</p>
+      <figure class="uap-draft-figure">
+        <figcaption><b>Reference judgement versus UAP-altered judgement</b><span>one central perturbation budget controls all five examples</span></figcaption>
+        <div class="uap-control-strip">
+          <div><span>CAUSAL TARGET</span><b>Interestingness</b></div>
+          <label>PERTURBATION BUDGET <input id="draftEpsilon" type="range" min="0" max="4" step="1" value="2"><output id="draftEpsilonValue">ε = 1.00</output></label>
+          <div><span>HELD-OUT TASK</span><b>Shopping relevance</b></div>
+        </div>
+        <div class="outcome-compare">
+          <section class="outcome-panel reference"><header><span>REFERENCE LABELS</span><b>clean images</b></header><div class="outcome-rows"><div><span>low</span><i style="--w:18%"></i><b>reference mass</b></div><div><span>moderate</span><i style="--w:54%"></i><b>reference mass</b></div><div><span>high</span><i style="--w:28%"></i><b>reference mass</b></div></div></section>
+          <div class="intervention-bridge"><span>one fixed</span><b>δ</b><span>applied unchanged</span></div>
+          <section class="outcome-panel altered"><header><span>AFTER PERTURBATION</span><b>same held-out images</b></header><div class="outcome-rows"><div><span>low</span><i style="--w:42%"></i><b>shifted mass</b></div><div><span>moderate</span><i style="--w:43%"></i><b>shifted mass</b></div><div><span>high</span><i style="--w:15%"></i><b>shifted mass</b></div></div></section>
+        </div>
+        <div class="gallery-heading"><b>Five largest observed behavioural shifts</b><span>same five images at every ε · selected at ε = 1.00</span></div>
+        <div class="image-gallery" aria-label="Five image examples controlled by the perturbation budget">
+          <article><div class="image-slot"><span>IMAGE 01</span><small>published reconstruction pending</small></div><p><b>Clean label</b> → <b class="after">after δ</b></p><small>evaluation text changes here</small></article>
+          <article><div class="image-slot"><span>IMAGE 02</span><small>published reconstruction pending</small></div><p><b>Clean label</b> → <b class="after">after δ</b></p><small>evaluation text changes here</small></article>
+          <article><div class="image-slot"><span>IMAGE 03</span><small>published reconstruction pending</small></div><p><b>Clean label</b> → <b class="after">after δ</b></p><small>evaluation text changes here</small></article>
+          <article><div class="image-slot"><span>IMAGE 04</span><small>published reconstruction pending</small></div><p><b>Clean label</b> → <b class="after">after δ</b></p><small>evaluation text changes here</small></article>
+          <article><div class="image-slot"><span>IMAGE 05</span><small>published reconstruction pending</small></div><p><b>Clean label</b> → <b class="after">after δ</b></p><small>evaluation text changes here</small></article>
+        </div>
+        <p class="draft-note">The final figure will replace every placeholder with the exact reconstructed input at the selected ε, plus the saved clean and perturbed rating/evaluation text. The aggregate panels will use the full held-out set, not these five examples alone.</p>
+      </figure>
+    </section>
+  </main>
+  <script>
+    const values=['clean reference','ε = 0.10','ε = 0.50','ε = 1.00','ε = 2.00'];
+    const slider=document.getElementById('draftEpsilon'), output=document.getElementById('draftEpsilonValue');
+    slider.addEventListener('input',()=>output.textContent=values[Number(slider.value)]);
+  </script>
+</body>
+</html>

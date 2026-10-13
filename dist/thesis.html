@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Interactive research site for Affective Vulnerabilities in Multimodal Language Models by Julia Jihagen.">
+  <title>Affective Vulnerabilities in Multimodal Language Models — Julia Jihagen</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23111626'/%3E%3Cpath d='M8 24V8h4v12h12v4z' fill='%23f2f2ed'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="thesis.css">
+<link rel="stylesheet" href="thesis-geometry.css?v=20261012-transfer7">
+<link rel="stylesheet" href="transfer-chart.css?v=20261012-transfer8">
+<link rel="stylesheet" href="transfer-contrast.css?v=20261012-transfer8">
+<link rel="stylesheet" href="layout-tightening.css?v=20261012-tight4">
+</head>
+<body>
+  <header class="masthead"><a href="thesis.html">JULIA JIHAGEN</a><nav class="study-nav" aria-label="Research projects"><a href="index.html?homonym">01 Homonym Semantics</a><a class="active" href="thesis.html">02 Master's Thesis</a></nav><a href="https://github.com/Jihagen/Vision-Transformers" target="_blank" rel="noreferrer">Repository ↗</a></header>
+  <main class="page" id="top">
+    <section class="intro thesis-intro">
+      <p class="eyebrow">STUDY 02 · MULTIMODAL LANGUAGE MODELS · MASTER'S THESIS</p>
+      <h1>Affective Vulnerabilities<br>in Multimodal Language Models</h1>
+      <p class="dek">From internal representations to generalisable image-only attacks.</p>
+      <p class="scope">Llama-4-Scout-17B-16E-Instruct · visual evaluation · internal-state analysis · activation steering · universal adversarial perturbations.</p>
+    </section>
+    <section class="thesis-section thesis-summary findings" aria-labelledby="summary-title">
+      <div class="section-label"><span>01</span><h2 id="summary-title">Executive summary</h2></div>
+      <ol>
+        <li><a href="#discovery-title"><b>The model represents abstract concepts as distinct, readable directions.</b><p>Persona attributes, emotions, workload, and interestingness are highly separable in the language stream, but not in the vision tower.</p></a></li>
+        <li><a href="#causal-title"><b>Not everything the model represents influences its judgments.</b><p>Affective and evaluative directions causally change interestingness ratings, while demographic directions have little effect despite being equally readable.</p></a></li>
+        <li><a href="#causal-title"><b>Emotional states influence judgments beyond their immediate task.</b><p>Excitement increases perceived interestingness, while anger and stress reduce it.</p></a></li>
+        <li><a href="#transfer-title"><b>Stress transfers across tasks in ways predicted by human cognitive psychology.</b><p>Without retraining, the stress perturbation increases perceived damage severity and makes shopping and moral evaluations more negative.</p></a></li>
+        <li><a href="#transfer-title"><b>At stronger perturbations, different emotions produce similar behavioral effects.</b><p>Even opposing affective directions converge on similar cross-task outcomes, suggesting that large perturbations may override emotion-specific effects.</p></a></li>
+        <li><a href="#geometry-title"><b>Interestingness and excitement share a common representational direction.</b><p>Their internal representations become increasingly aligned across layers, and their perturbations produce similar cross-task effects, consistent with a shared valence component.</p></a></li>
+      </ol>
+    </section>
+    <section class="thesis-section experiment-section" aria-labelledby="experiment-title">
+      <div class="section-label"><span>02</span><h2 id="experiment-title">From prompted state to model evaluation</h2></div>
+      <p class="figure-intro">A controlled contrast isolates the representational effect of the prompted state: the image and evaluation request remain fixed; only the persona information changes.</p>
+      <figure class="experiment-map" aria-labelledby="experiment-caption">
+        <figcaption id="experiment-caption"><b>Persona-prompting experiment</b><span>Schematic; response text will be replaced with a saved model example</span></figcaption>
+        <div class="experiment-flow">
+          <article class="prompt-card persona-card"><p class="card-kicker">VARIABLE INPUT</p><h3>Persona prompt</h3><p class="prompt-copy">“Please evaluate the image as a person with the following details:”</p><div class="trait-list" aria-label="Example persona attributes"><span class="trait interest">high interest</span><span class="trait workload">high workload</span><span class="trait affect">positive affect</span><span class="trait social">socially outgoing</span></div></article>
+          <div class="flow-arrow" aria-hidden="true"><span>+</span></div>
+          <article class="prompt-card constant-card"><h3>Evaluation prompt</h3><img class="fixed-image" src="assets/uap_gallery/interest/0129/clean.webp" alt="Illustrative held-out image: a dolphin in the water."><p class="prompt-copy">“How interesting is this image? Give an interestingness rating and a short evaluation.”</p></article>
+          <div class="flow-arrow" aria-hidden="true">→</div>
+          <article class="model-card"><p class="card-kicker">MODEL</p><h3>Multimodal LLM</h3><div class="model-stack"><span>visual tokens</span><span>language layers</span><span>internal state</span></div></article>
+          <div class="flow-arrow" aria-hidden="true">→</div>
+          <article class="response-card"><p class="card-kicker">MEASURED OUTPUT</p><h3>Model response</h3><p><strong>Interestingness rating:</strong><br><em>Saved example forthcoming</em></p><p><strong>Evaluation:</strong><br><em>Saved example forthcoming</em></p></article>
+        </div>
+        <div class="measurement-strip"><span>1 · extract hidden states</span><span>2 · identify representation directions</span><span>3 · test causal intervention</span><span>4 · induce state from pixels</span></div>
+      </figure>
+    </section>
+    <section class="thesis-section discovery-section" aria-labelledby="discovery-title">
+      <div class="section-label"><span>03</span><h2 id="discovery-title">Representation discovery</h2></div>
+      <p class="figure-intro">With the visual input held constant, prompted persona states become decodable as the model processes language. This figure localises structured, readable state information; later sections test whether these directions are causally responsible for behaviour.</p>
+      <div class="discovery-mode" role="group" aria-label="Choose contrast family"><button class="active" data-discovery-mode="states" type="button">Affective &amp; evaluative states</button><button data-discovery-mode="identity" type="button">Identity controls</button></div>
+      <figure class="panel discovery-panel"><figcaption><b id="discoveryFigureTitle">Affective and evaluative directions</b><span>Projection AUROC · preliminary</span></figcaption><svg id="discoveryChart" viewBox="0 0 1080 440" role="img" aria-label="Layerwise separability across vision and language streams"></svg><div class="discovery-legend" id="discoveryLegend"></div></figure>
+      <div class="discovery-readout" id="discoveryReadout" aria-live="polite"></div>
+      <p class="source-note">Shading marks the 34 vision layers; the remaining 48 layers are the language stream. Lines are family means and bands are the observed range across released contrasts. The fixed image makes the near-chance vision result an expected control, not missing data.</p>
+      <p class="figure-note">This is in-sample projection separability, so it establishes decodable structure rather than causal importance or cross-task generalisation.</p>
+    </section>
+    <section class="thesis-section geometry-section" aria-labelledby="geometry-title">
+      <div class="section-label"><span>04</span><h2 id="geometry-title">Representation geometry</h2></div>
+      <p class="figure-intro">At the selected language layer, persona-induced directions can be compared as a common directional field. The same released condition means also let us ask how close an additive prediction comes to a fully specified persona.</p>
+      <figure class="panel vector-panel"><figcaption><b>Directions from a neutral reference</b><span>language_29 · 3D display projection</span></figcaption><div class="geometry-tools"><button id="vectorReset" type="button">Reset view</button><span>Drag plot to rotate</span></div><svg id="vectorFieldChart" viewBox="0 0 1080 440" role="img" aria-label="Rotatable 3D vector field of persona-related directions"></svg><div class="vector-legend" id="vectorLegend"></div><p class="figure-note">All arrows begin at the neutral reference. Their drawn lengths are normalised to foreground angular alignment; raw full-space norms and the complete signed cosine matrix remain in the released export.</p></figure>
+      <figure class="panel composition-panel"><figcaption><b>Build a persona prediction</b><span id="compositionCaption">Loading released composition paths…</span></figcaption><p class="composition-intro">Choose a persona, then select components in the order you want to add them. The path follows that order from the grand mean; the black point is the observed fully specified persona.</p><div class="composition-controls"><label>GENDER <select id="personaGender" aria-label="Select persona gender"><option value="female">Female</option><option value="male">Male</option></select></label><label>EMOTION <select id="personaEmotion" aria-label="Select persona emotion"></select></label><label>COUNTRY <select id="personaCountry" aria-label="Select persona country"><option value="Germany">Germany</option><option value="Nigeria">Nigeria</option></select></label></div><div class="component-toggles" role="group" aria-label="Choose persona components in order"><button type="button" data-component="gender">Gender</button><button type="button" data-component="emotion">Emotion</button><button type="button" data-component="country">Country</button><span id="componentOrder">No components selected</span></div><svg id="compositionChart" viewBox="0 0 1080 400" role="img" aria-label="Persona prediction path from grand mean to observed condition"></svg><div class="composition-readout" id="compositionReadout" aria-live="polite"></div><p class="figure-note">The display projection is fitted on observed condition means only. Accuracy readouts are measured in the original full space, not from the plotted coordinates.</p></figure>
+    </section>
+    <section class="thesis-section causal-section" aria-labelledby="causal-title">
+      <div class="section-label"><span>05</span><h2 id="causal-title">Causal intervention</h2></div>
+      <p class="figure-intro">Hold the image set and evaluation prompt fixed, then add a scaled internal direction at the selected language layer. The output categories move with the intervention strength: this is the behavioural test that turns a readable vector into a candidate causal one.</p>
+      <figure class="panel lexical-panel"><figcaption><b>How the output lexicon changes under steering</b><span>same 93 evaluation inputs · selected language layer</span></figcaption><div class="causal-controls"><label>DIRECTION / LAYER <select id="causalDirection" aria-label="Choose internal direction and layer"></select></label><label class="range-control">INJECTION STRENGTH <input id="causalAlpha" type="range" min="0" max="8" step="1" value="4"><output id="causalAlphaValue">α = 0</output></label></div><div class="causal-evidence-grid"><div><div class="lexicon-compare" id="lexiconCompare" aria-live="polite"></div><div class="causal-readout" id="causalReadout" aria-live="polite"></div></div><section class="logit-panel"><header><b>Vocabulary pulled by the direction</b><span>logit lens · qualitative</span></header><div id="logitLensCompare" aria-live="polite"></div><p>These are directional logit shifts, not observed next-token probabilities from the steered run.</p></section></div><p class="figure-note">Each row is an emitted interestingness category, not a post-hoc text analysis. The reference panel is always α = 0; the right panel is the selected intervention.</p></figure>
+    </section>
+    <section class="thesis-section perturbation-section" aria-labelledby="perturbation-title">
+      <div class="section-label"><span>06</span><h2 id="perturbation-title">From vector to pixels</h2></div>
+      <p class="figure-intro">A single pixel-space perturbation is optimised toward one internal direction, then added unchanged to held-out images. One ε control updates all five deliberately extreme examples together.</p>
+      <figure class="panel uap-gallery-panel"><figcaption><b>Clean reference versus universal perturbation</b><span id="uapGalleryCaption">Loading image gallery…</span></figcaption><div class="causal-controls"><label>ATTACK TARGET <select id="uapGalleryTarget" aria-label="Choose universal perturbation target"></select></label><label class="range-control">PERTURBATION BUDGET <input id="uapGalleryEpsilon" type="range" min="0" max="4" step="1" value="3"><output id="uapGalleryEpsilonValue">ε = 1.00</output></label></div><div class="uap-gallery-summary" id="uapGallerySummary" aria-live="polite"></div><div class="uap-gallery-grid" id="uapGalleryGrid" aria-live="polite"></div><p class="figure-note" id="uapGalleryNote">The five cards are selected for the largest shifts at ε = 1.00, not as representative examples of the full held-out set.</p></figure>
+    </section>
+    <section class="thesis-section transfer-section" aria-labelledby="transfer-title">
+      <div class="section-label"><span>07</span><h2 id="transfer-title">Transfer across unseen tasks</h2></div>
+      <p class="figure-intro">Select one perturbation, then compare its deliberately extreme examples with its full-dataset label shift across three unseen tasks. The UAP itself is unchanged across all evaluations.</p>
+      <figure class="panel transfer-panel"><figcaption><b>One perturbation · three unseen evaluations</b><span id="transferCaption">Loading transfer results…</span></figcaption><div class="causal-controls"><label>PERTURBATION <select id="transferTarget" aria-label="Choose transfer perturbation target"></select></label><label class="range-control">PERTURBATION BUDGET <input id="transferEpsilon" type="range" min="0" max="3" step="1" value="2"><output id="transferEpsilonValue">ε = 1.00</output></label></div><div class="transfer-comparison"><div class="transfer-matrix-wrap"><div class="transfer-matrix" id="transferMatrix" aria-live="polite"></div></div></div><h3 class="transfer-details-title" id="transferDetailsTitle" tabindex="-1">Details</h3><section class="transfer-detail" id="transferDetail" aria-labelledby="transferDetailsTitle" aria-live="polite"></section><p class="figure-note">The five examples per task are extreme observed shifts for the selected UAP at ε = 1.00, not representative cases. The distribution panels use all held-out inputs. Shopping and SMID images are shown under their source terms; MEDIC remains identifier-only.</p></figure>
+    </section>
+    <section class="methods thesis-release" aria-labelledby="release-title"><div class="section-label"><span>DATA</span><h2 id="release-title">Reproducible release</h2></div><p>All figures on this page are generated from the repository’s released tables or saved model outputs. The code, web exports, validation checks and data documentation are available in the release; each gallery card retains its selected identifier, task scale and source policy.</p><a class="repo-link" href="https://github.com/Jihagen/Vision-Transformers" target="_blank" rel="noreferrer">Open the Vision Transformers release ↗</a></section>
+  </main>
+  <footer><span>JULIA JIHAGEN</span><span>AFFECTIVE VULNERABILITIES IN MULTIMODAL LANGUAGE MODELS</span></footer>
+<script src="thesis.js?v=20261012-transfer8"></script>
+</body>
+</html>

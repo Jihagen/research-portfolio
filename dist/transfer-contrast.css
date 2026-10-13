@@ -1,0 +1,13 @@
+/* The reference guide becomes white wherever it lies inside the orange bar. */
+.lexicon-card.with-reference .lexicon-track .transfer-reference-on-bar{
+  position:absolute !important;
+  z-index:4 !important;
+  top:0 !important;
+  bottom:auto !important;
+  display:block !important;
+  width:2px !important;
+  height:10px !important;
+  background:repeating-linear-gradient(to bottom,#fff 0 2px,transparent 2px 4px) !important;
+  border:0 !important;
+  transform:translateX(-1px) !important;
+}

@@ -1,0 +1,36 @@
+/* Deliberately scoped desktop compaction for the overview and single-plot tiles. */
+.intro{padding:44px 0 34px}
+.intro h1{font-size:clamp(39px,4.7vw,60px)}
+.thesis-intro h1{font-size:clamp(37px,4.5vw,56px)}
+.intro .dek{margin:15px 0 9px;font-size:clamp(18px,2vw,25px)}
+.findings,.thesis-summary{padding:40px 0}
+.findings .section-label,.thesis-summary .section-label{margin-bottom:16px}
+.findings h2,.thesis-summary h2{font-size:26px}
+.findings li{min-height:136px;padding:2px 20px 6px}
+.findings li a{display:block;color:inherit;text-decoration:none;cursor:pointer}
+.findings li a:hover b,.findings li a:focus-visible b{color:var(--blue)}
+.findings li a:focus-visible{outline:2px solid var(--blue);outline-offset:4px}
+.thesis-summary .question-grid{gap:30px}
+.thesis-summary .question-grid .lead{font-size:23px}
+.thesis-summary .question-grid>div{gap:9px}
+/* A shared, compact rhythm: each section ends on a fine divider. */
+.findings,.figure-section,.methods,.thesis-section{padding:34px 0;border-bottom:1px solid var(--line)}
+.thesis-section.experiment-section,.thesis-section.discovery-section,.thesis-section.geometry-section,.thesis-section.causal-section,.thesis-section.perturbation-section{padding-bottom:34px}
+/* Full width at desktop; the plotted portion is deliberately 80% as tall. */
+@media (min-width:1000px){
+  .discovery-panel #discoveryChart{aspect-ratio:1080/352;height:auto}
+  .vector-panel #vectorFieldChart{aspect-ratio:1080/352;height:auto}
+  .composition-panel #compositionChart{aspect-ratio:1080/320;height:auto}
+  .trajectory-panel #trajectoryChart{aspect-ratio:1080/416;height:auto}
+  .comparison-section .stat-strip article{min-height:134px}
+}
+@media (max-width:760px){
+  .intro{padding:42px 0 32px}
+  .intro h1,.thesis-intro h1{font-size:clamp(38px,10vw,50px)}
+  .intro .dek{font-size:19px;margin:14px 0 9px}
+  .findings,.figure-section,.methods,.thesis-section{padding:30px 0}
+  .findings .section-label,.thesis-summary .section-label{margin-bottom:18px}
+  .findings li{min-height:0;padding:14px 16px}
+  .thesis-summary .question-grid{gap:18px}
+  .thesis-summary .question-grid .lead{font-size:24px}
+}
