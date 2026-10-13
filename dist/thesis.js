@@ -139,10 +139,9 @@ function drawComposition(data) {
   const condition=activeCondition(data), key=activeComponents.join('>'), prediction=key ? condition.predictions_by_order[key] : null, sequence=prediction ? prediction.stages : [];
   const stages=[{display:condition.grand_mean_display,label:'grand mean'},...sequence.map((stage,index)=>({display:stage.display,label:stage.included.at(-1)}))];
   const all=[...stages.map(stage=>stage.display),condition.observed_display], W=1080,H=400;
-  /* Keep one shared 3D display scale across selections, then rotate the actual exported coordinates. */
-  const referencePoints=data.conditions.flatMap(item=>[item.grand_mean_display,item.observed_display]);
-  const scene=[...referencePoints,...all,[.7,0,0],[0,.7,0],[0,0,.7]], projected=fitProjectedPoints(scene,W,H,compositionView.yaw,compositionView.pitch,92,60);
-  const base=referencePoints.length, displayStages=projected.slice(base,base+stages.length), observed=projected[base+stages.length], axes=projected.slice(base+all.length);
+  /* Rotate the actual exported coordinates and fit the selected journey so its 3D structure remains legible. */
+  const scene=[...all,[.7,0,0],[0,.7,0],[0,0,.7]], projected=fitProjectedPoints(scene,W,H,compositionView.yaw,compositionView.pitch,92,60);
+  const displayStages=projected.slice(0,stages.length), observed=projected[stages.length], axes=projected.slice(all.length);
   const colours=sequence.map(stage=>appliedComponentColour(stage.included.at(-1),condition.labels));
   let content='<defs>'+colours.map((colour,index)=>`<marker id="composition-arrow-${index}" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto"><path d="M0,0L10,5L0,10Z" fill="${colour}"/></marker>`).join('')+'</defs>';
   const origin=displayStages[0];
