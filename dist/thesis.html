@@ -34,7 +34,7 @@
         <li><a href="#transfer-title"><b>Attacks on affective states transfer across tasks.</b><p>Without retraining, stress shifts evaluation in the predicted severity direction, suggesting that the attack reaches a cognitive mode upstream of task level behaviour.</p></a></li>
         <li><a href="#geometry-title"><b>The sum is not greater than its parts: personas are compositional.</b><p>Stable, decodable characteristic vectors add together to predict where a combined persona's activation will end up.</p></a></li>
         <li><a href="#perturbation-title"><b>Targeted representation interventions can be recreated from pixels alone.</b><p>Universal perturbations look like noise to people, but target particular internal directions and reproduce their behavioural effect without changing the prompt.</p></a></li>
-        <li><a href="#transfer-title"><b>Stress UAPs transfer across models.</b><p>Preliminary results suggest that the relevant model geometry is similar enough for stress UAPs to transfer across model families.</p></a></li>
+        <li><a href="#model-transfer-title"><b>Stress UAPs transfer across models.</b><p>Preliminary results suggest that the relevant model geometry is similar enough for stress UAPs to transfer across model families.</p></a></li>
       </ol>
     </section>
     <section class="thesis-section experiment-section" aria-labelledby="experiment-title">
@@ -98,6 +98,15 @@
       <p class="figure-intro">The same state-targeted perturbation shifts damage, moral and shopping evaluations without retraining. Because the effect survives across different task formats, the working interpretation is that affective states sit upstream of task-level behaviour.</p>
       <p class="source-note"><strong>Cross-model transfer is currently running.</strong> Early workload and interestingness runs reproduce above-control effects in several Qwen and LLaVA task settings; remaining shuffled controls, bootstrap intervals and model runs will determine the final comparative claim.</p>
       <figure class="panel transfer-panel"><figcaption><b>One perturbation · three unseen evaluations</b><span id="transferCaption">Loading transfer results…</span></figcaption><div class="causal-controls"><label>PERTURBATION <select id="transferTarget" aria-label="Choose transfer perturbation target"></select></label><label class="range-control">PERTURBATION BUDGET <input id="transferEpsilon" type="range" min="0" max="3" step="1" value="2"><output id="transferEpsilonValue">ε = 1.00</output></label></div><div class="transfer-comparison"><div class="transfer-matrix-wrap"><div class="transfer-matrix" id="transferMatrix" aria-live="polite"></div></div></div><h3 class="transfer-details-title" id="transferDetailsTitle" tabindex="-1">Details</h3><section class="transfer-detail" id="transferDetail" aria-labelledby="transferDetailsTitle" aria-live="polite"></section><p class="figure-note">The five examples per task are extreme observed shifts for the selected UAP at ε = 1.00, not representative cases. The distribution panels use all held-out inputs. Shopping and SMID images are shown under their source terms; MEDIC remains identifier-only.</p></figure>
+    </section>
+    <section class="thesis-section model-transfer-section" aria-labelledby="model-transfer-title">
+      <div class="section-label"><span>09</span><h2 id="model-transfer-title">Transfer across models</h2></div>
+      <p class="figure-intro">Can the same stress UAP shift behaviour outside Llama 4 Scout? Results are still pending. Preliminary runs on Qwen and LLaVA suggest that it can.</p>
+      <figure class="panel">
+        <figcaption><b>Stress UAP transfer</b><span>Preliminary evidence · final comparison pending</span></figcaption>
+        <p class="source-note"><strong>Qwen and LLaVA are early positive cases.</strong> The stress perturbation produces above-control shifts in Qwen moral evaluation and shopping relevance, and in LLaVA damage severity. Qwen damage and LLaVA moral evaluation are exceptions.</p>
+        <p class="figure-note">Mistral runs, Llama shuffled controls and bootstrap confidence intervals are still pending. This section will become the source-model by target-model comparison once those results are complete.</p>
+      </figure>
     </section>
     <section class="methods thesis-release" aria-labelledby="release-title"><div class="section-label"><span>DATA</span><h2 id="release-title">Reproducible release</h2></div><p>All figures on this page are generated from the repository’s released tables or saved model outputs. The code, web exports, validation checks and data documentation are available in the release; each gallery card retains its selected identifier, task scale and source policy.</p><a class="repo-link" href="https://github.com/Jihagen/Vision-Transformers" target="_blank" rel="noreferrer">Open the Vision Transformers release ↗</a></section>
   </main>
